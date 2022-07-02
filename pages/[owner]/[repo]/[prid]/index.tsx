@@ -139,8 +139,11 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
 
         <h4>Transactions:</h4>
         <ListGroup style={{ width: '600px' }} className="d-flex gap-3 py-2">
-          {list.map((o: any) => <ListGroup.Item>
+          {list.map((o: any) => <ListGroup.Item key={o.txid}>
             <div>
+              <p className="mb-0">
+                <strong>{parseInt(o.amount) / 1000000} XRP</strong> on <i>{new Date(o.timestamp).toUTCString()}</i>
+              </p>
               <p className="mb-0">
                 Sender:
                 <a href={`https://testnet.xrpl.org/accounts/${o.sender}`} rel="noreferrer" target="_blank">
@@ -152,9 +155,6 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
                 <a href={`https://testnet.xrpl.org/transactions/${o.txid}`} rel="noreferrer" target="_blank">
                   <i>{o.txid.substring(0, 35)}...{o.txid.substring(o.txid.length - 10)}</i>
                 </a>
-              </p>
-              <p className="mb-0">
-                <strong>{parseInt(o.amount) / 1000000} XRP</strong> on <i>{new Date(o.timestamp).toUTCString()}</i>
               </p>
             </div>
           </ListGroup.Item>)}

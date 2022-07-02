@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import axios from 'axios'
 import connection from '../../helpers/mongo';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
@@ -29,6 +30,30 @@ async function insertTransaction(body: any): Promise<any> {
     .insertOne(body);
 
   // insert github comment to the PR so that it trigger the label again
+  const { repo, owner, prid, txid } = body;
+  const GRAPHQL_URL = 'https://api.github.com/graphql';
+  const headers = {
+    'content-type': 'application/json',
+    'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+  };
+
+  let query: string = '', res;
+  query = `query {
+    repository(name: "${repo}", owner: "${owner}") {
+      pullRequest(number: ${prid}) {
+        id
+      }
+    }
+  }`;
+  res = await axios.post(GRAPHQL_URL, { query }, { headers });
+  const id = res.data.data.repository.pullRequest.id;
+
+  query = `mutation {
+    addComment(input: {subjectId: "${id}", body: "XRP Donation received (txid): ${txid}"}) {
+      subject { id }
+    }
+  }`
+  res = await axios.post(GRAPHQL_URL, { query }, { headers });
 
   return result;
 }
