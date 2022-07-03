@@ -235,19 +235,19 @@ export async function getServerSideProps(context: any) {
   }
 
   async function getPaymentInfo() {
-    return {
-      uuid: 'e5120941-53c6-4781-a76a-d6db26c84ce1',
-      next: {
-        always: 'https://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1'
-      },
-      refs: {
-        qr_png: 'https://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1_q.png',
-        qr_matrix: 'https://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1_q.json',
-        qr_uri_quality_opts: ['m', 'q', 'h'],
-        websocket_status: 'wss://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1'
-      },
-      pushed: false
-    };
+    // return {
+    //   uuid: 'e5120941-53c6-4781-a76a-d6db26c84ce1',
+    //   next: {
+    //     always: 'https://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1'
+    //   },
+    //   refs: {
+    //     qr_png: 'https://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1_q.png',
+    //     qr_matrix: 'https://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1_q.json',
+    //     qr_uri_quality_opts: ['m', 'q', 'h'],
+    //     websocket_status: 'wss://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1'
+    //   },
+    //   pushed: false
+    // };
 
     const xumm = new XummSdk(process.env.XUMM_APIKEY, process.env.XUMM_SECRET);
 
