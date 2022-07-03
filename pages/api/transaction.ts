@@ -30,7 +30,7 @@ async function insertTransaction(body: any): Promise<any> {
     .insertOne(body);
 
   // insert github comment to the PR so that it trigger the label again
-  const { repo, owner, prid, txid } = body;
+  const { repo, owner, prid, txid, amount, isTargetAchieved, network } = body;
   const GRAPHQL_URL = 'https://api.github.com/graphql';
   const headers = {
     'content-type': 'application/json',
@@ -48,8 +48,11 @@ async function insertTransaction(body: any): Promise<any> {
   res = await axios.post(GRAPHQL_URL, { query }, { headers });
   const id = res.data.data.repository.pullRequest.id;
 
+  const commentBody = `<strong>XRPDonation:${isTargetAchieved ? 'Achieved' : 'Funded'}<strong> Received ${amount/1000000} XRP.
+  Click <a href="https://${network}.xrpl.org/transactions/${txid}">here</a> for more details.`;
+
   query = `mutation {
-    addComment(input: {subjectId: "${id}", body: "XRP Donation received (txid): ${txid}"}) {
+    addComment(input: {subjectId: "${id}", body: "${commentBody}"}) {
       subject { id }
     }
   }`

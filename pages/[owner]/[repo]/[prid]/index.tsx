@@ -15,7 +15,8 @@ import styles from '../../../../styles/Home.module.css'
 
 const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
   const router = useRouter();
-  const { owner = '', repo = '', prid = '', address = '', target = 100 } = router.query;
+  const { owner = '', repo = '', prid = '', address = '', target = '100', network = 'testnet' } = router.query;
+  const _target = parseInt(target);
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -47,8 +48,14 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
         console.log('xumm websocket message', data);
         const txid = data.txid;
 
+        let networkUrl: string = ''; // https://xrpl.org/public-servers.html
+        switch (network) {
+          case 'mainnet': networkUrl = 'wss://s1.ripple.com:51233'; break;
+          case 'devnet': networkUrl = 'wss://s.devnet.rippletest.net:51233'; break;
+          default: networkUrl = 'wss://s.altnet.rippletest.net:51233';
+        }
         // @ts-ignore
-        const api = new xrpl.Client('wss://s.altnet.rippletest.net:51233');
+        const api = new xrpl.Client(networkUrl);
         await api.connect();
 
         // search xrp ledger for amount;
@@ -63,7 +70,8 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
         const timestamp = new Date().getTime();
 
         const query = { owner, repo, prid, txid, amount, sender, timestamp };
-        const record = await axios.post('/api/transaction', query);
+        const isTargetAchieved = totalFunding() > _target;
+        const record = await axios.post('/api/transaction', { isTargetAchieved, network, ...query });
         console.log('save', record);
         // @ts-ignore
         setList(oldList => [...oldList, query]);
@@ -78,7 +86,6 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
       const records = await axios.get('/api/transaction', {
         params: { owner, repo, prid },
       });
-      console.log(records.data);
       setList(records.data);
     }
 
@@ -127,7 +134,7 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
         </Table>
 
         <strong>Funding Target</strong>
-        <ProgressBar style={{ width: '600px' }} now={totalFunding() * 100 / target} />
+        <ProgressBar style={{ width: '600px' }} now={totalFunding() * 100 / _target} />
 
         <br />
 
@@ -137,7 +144,8 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
 
         <br />
 
-        <h4>Transactions:</h4>
+        {list.length ? <h4>Transactions:</h4> : ''}
+
         <ListGroup style={{ width: '600px' }} className="d-flex gap-3 py-2">
           {list.map((o: any) => <ListGroup.Item key={o.txid}>
             <div>
@@ -146,13 +154,13 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
               </p>
               <p className="mb-0">
                 Sender:
-                <a href={`https://testnet.xrpl.org/accounts/${o.sender}`} rel="noreferrer" target="_blank">
+                <a href={`https://${network}.xrpl.org/accounts/${o.sender}`} rel="noreferrer" target="_blank">
                   <i>{o.sender}</i>
                 </a>
               </p>
               <p className="mb-0">
                 Txid:
-                <a href={`https://testnet.xrpl.org/transactions/${o.txid}`} rel="noreferrer" target="_blank">
+                <a href={`https://${network}.xrpl.org/transactions/${o.txid}`} rel="noreferrer" target="_blank">
                   <i>{o.txid.substring(0, 35)}...{o.txid.substring(o.txid.length - 10)}</i>
                 </a>
               </p>
