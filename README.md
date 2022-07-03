@@ -1,4 +1,11 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# XRP Donation app
+
+This is the frontend implementation for user to send **Donation** to their favorite Open Source project via XRP using XUMM wallet.
+
+Refer to [XRP-Donation-Action](https://github.com/blueorbitz/xrp-donation-action) from the implementation to attach using Github Actions.
+
+The Github action will route using `XRP_DONATION_URL` environment variable with the following structure for the endpoint.
+`{XRP_DONATION_URL}/{Github Owner}/{Github Repo}/{Pull Request#}?address={xrp wallet}&network={xrp network}&target={target-goal}`.
 
 ## Getting Started
 
@@ -12,20 +19,20 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+Refer to [XRP-Donation-Action](https://github.com/blueorbitz/xrp-donation-action) to setup the Github Action. Once ready, it will create a donation link to using this Server url.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Requisite
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+You'll need to have the following ready:
+- Github token (personal for development)
+- Xumm APIKey and APISecret.
+- MongoDB
 
-## Learn More
+Copy `.env.local.sample` and rename to `.env.local`. Fill in the requiste information in the environment file.
 
-To learn more about Next.js, take a look at the following resources:
+`yarn dev` to start.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Everything else follow the guide from NextJS.
 
 ## Deploy on Vercel
 
