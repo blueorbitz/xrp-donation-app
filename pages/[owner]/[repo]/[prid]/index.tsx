@@ -16,6 +16,8 @@ import styles from '../../../../styles/Home.module.css'
 const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
   const router = useRouter();
   const { owner = '', repo = '', prid = '', address = '', target = '100', network = 'testnet' } = router.query;
+
+  // @ts-ignore
   const _target = parseInt(target);
 
   const [show, setShow] = useState(false);
