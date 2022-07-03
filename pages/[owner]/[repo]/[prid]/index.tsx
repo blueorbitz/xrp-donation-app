@@ -37,10 +37,10 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
 
     console.log('conneting to ', xummPayment?.refs?.websocket_status);
     websocketXummStatus = new WebSocket(xummPayment?.refs?.websocket_status);
-    websocketXummStatus.onopen = function (event: any) {
+    websocketXummStatus.onopen = (event: any) => {
       console.log('xumm websocket connect');
     };
-    websocketXummStatus.onmessage = async function (event: any) {
+    websocketXummStatus.onmessage = async (event: any) => {
       const data = JSON.parse(event.data);
       // console.log('xumm ping', data);
       if (data.expired)
@@ -72,8 +72,7 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
         const timestamp = new Date().getTime();
 
         const query = { owner, repo, prid, txid, amount, sender, timestamp };
-        const isTargetAchieved = (totalFunding() + (amount/1000000)) >= _target;
-        const record = await axios.post('/api/transaction', { isTargetAchieved, network, ...query });
+        const record = await axios.post('/api/transaction', { target, network, ...query });
         console.log('save', record);
         // @ts-ignore
         setList(oldList => [...oldList, query]);
@@ -238,18 +237,18 @@ export async function getServerSideProps(context: any) {
 
   async function getPaymentInfo() {
     // return {
-    //   uuid: 'e5120941-53c6-4781-a76a-d6db26c84ce1',
+    //   uuid: 'b9c6e05e-4a28-4da3-b0ad-b006820eefb6',
     //   next: {
-    //     always: 'https://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1'
+    //     always: 'https://xumm.app/sign/b9c6e05e-4a28-4da3-b0ad-b006820eefb6'
     //   },
     //   refs: {
-    //     qr_png: 'https://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1_q.png',
-    //     qr_matrix: 'https://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1_q.json',
+    //     qr_png: 'https://xumm.app/sign/b9c6e05e-4a28-4da3-b0ad-b006820eefb6_q.png',
+    //     qr_matrix: 'https://xumm.app/sign/b9c6e05e-4a28-4da3-b0ad-b006820eefb6_q.json',
     //     qr_uri_quality_opts: ['m', 'q', 'h'],
-    //     websocket_status: 'wss://xumm.app/sign/e5120941-53c6-4781-a76a-d6db26c84ce1'
+    //     websocket_status: 'wss://xumm.app/sign/b9c6e05e-4a28-4da3-b0ad-b006820eefb6'
     //   },
     //   pushed: false
-    // };
+    // }
 
     const xumm = new XummSdk(process.env.XUMM_APIKEY, process.env.XUMM_SECRET);
 
