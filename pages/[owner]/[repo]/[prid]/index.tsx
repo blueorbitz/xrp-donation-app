@@ -72,7 +72,7 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
         const timestamp = new Date().getTime();
 
         const query = { owner, repo, prid, txid, amount, sender, timestamp };
-        const isTargetAchieved = totalFunding() >= _target;
+        const isTargetAchieved = (totalFunding() + (amount/1000000)) >= _target;
         const record = await axios.post('/api/transaction', { isTargetAchieved, network, ...query });
         console.log('save', record);
         // @ts-ignore
