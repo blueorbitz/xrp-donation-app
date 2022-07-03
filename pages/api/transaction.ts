@@ -48,7 +48,7 @@ async function insertTransaction(body: any): Promise<any> {
   res = await axios.post(GRAPHQL_URL, { query }, { headers });
   const id = res.data.data.repository.pullRequest.id;
 
-  const commentBody = `<strong>XRPDonation:${isTargetAchieved ? 'Achieved' : 'Funded'}<strong> Received ${amount/1000000} XRP.
+  const commentBody = `<strong>XRPDonation:${isTargetAchieved ? 'Achieved' : 'Funded'}</strong> Received ${amount/1000000} XRP.
   Click <a href=\\"https://${network}.xrpl.org/transactions/${txid}\\">here</a> for more details.`;
 
   query = `mutation {
