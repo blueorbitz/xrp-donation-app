@@ -49,7 +49,7 @@ async function insertTransaction(body: any): Promise<any> {
   const id = res.data.data.repository.pullRequest.id;
 
   const commentBody = `<strong>XRPDonation:${isTargetAchieved ? 'Achieved' : 'Funded'}<strong> Received ${amount/1000000} XRP.
-  Click <a href="https://${network}.xrpl.org/transactions/${txid}">here</a> for more details.`;
+  Click <a href=\\"https://${network}.xrpl.org/transactions/${txid}\\">here</a> for more details.`;
 
   query = `mutation {
     addComment(input: {subjectId: "${id}", body: "${commentBody}"}) {
