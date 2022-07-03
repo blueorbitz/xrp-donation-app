@@ -51,9 +51,9 @@ async function insertTransaction(body: any): Promise<any> {
 
   const list = await getTransaction({ prid, owner, repo });
   const total = list.reduce((sum: number, e: any) => sum + parseInt(e.amount), 0);
-  const isTargetAchieved = (total + parseInt(amount)) >= (parseFloat(target) * 1000000);
+  const isTargetAchieved = total >= (parseFloat(target) * 1000000);
 
-  console.log('isTargetAchieved', isTargetAchieved);
+  console.log('isTargetAchieved', isTargetAchieved, total, amount, target);
 
   const commentBody = `<strong>XRPDonation:${isTargetAchieved ? 'Achieved' : 'Funded'}</strong> Received ${amount/1000000} XRP.
   Click <a href=\\"https://${network}.xrpl.org/transactions/${txid}\\">here</a> for more details.`;
