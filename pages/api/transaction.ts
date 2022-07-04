@@ -71,9 +71,17 @@ async function insertTransaction(body: any): Promise<any> {
 async function getTransaction(query: any): Promise<any> {
   const client = await connection;
   const db = client.db(process.env.MONGODB_DB);
+
+  let limit = 50;
+  if (query.limit != null) {
+    limit = parseInt(query.limit);
+    delete query.limit;
+  }
+
   const results = await db.collection(process.env.MONGODB_COLLECTION)
     .find(query)
     .sort({ timestamp: -1 })
+    .limit(limit)
     .toArray();
 
   return results;

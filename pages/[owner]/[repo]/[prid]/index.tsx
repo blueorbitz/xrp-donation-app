@@ -103,7 +103,7 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
 
       <main className={styles.main}>
         <h3 className={styles.title}>
-          <a href="https://nextjs.org">XRP</a> OSS Donation
+          <Link href="/">XRP</Link> OSS Donation
         </h3>
         <h4>Show your support for your favorite Open-source project</h4>
 
@@ -121,7 +121,7 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
             </tr>
             <tr>
               <td><strong>Destination Address</strong></td>
-              <td>{address}</td>
+              <td>(<b>{network}</b>) <i>{address}</i></td>
             </tr>
             <tr>
               <td><strong>Funding Target</strong></td>
