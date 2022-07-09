@@ -7,6 +7,10 @@ Refer to [XRP-Donation-Action](https://github.com/blueorbitz/xrp-donation-action
 The Github action will route using `XRP_DONATION_URL` environment variable with the following structure for the endpoint.
 `{XRP_DONATION_URL}/{Github Owner}/{Github Repo}/{Pull Request#}?address={xrp wallet}&network={xrp network}&target={target-goal}`.
 
+## Video and Demo
+
+https://youtu.be/ULanS935bKY
+
 ## Getting Started
 
 First, run the development server:
