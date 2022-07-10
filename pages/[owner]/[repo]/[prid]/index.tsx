@@ -12,8 +12,9 @@ import ProgressBar from 'react-bootstrap/ProgressBar'
 import ListGroup from 'react-bootstrap/ListGroup'
 import { XummSdk } from 'xumm-sdk'
 import styles from '../../../../styles/Home.module.css'
+import stepzenRequest, { unquotedStringify } from '../../../../helpers/stepzen'
 
-const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
+const XRPHome: NextPage = ({ pullRequest, xummPayment, records }: any) => {
   const router = useRouter();
   const { owner = '', repo = '', prid = '', address = '', target = '100', network = 'testnet' } = router.query;
 
@@ -52,46 +53,25 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
 
         let networkUrl: string = ''; // https://xrpl.org/public-servers.html
         switch (network) {
-          case 'mainnet': networkUrl = 'wss://s1.ripple.com:51233'; break;
-          case 'devnet': networkUrl = 'wss://s.devnet.rippletest.net:51233'; break;
-          default: networkUrl = 'wss://s.altnet.rippletest.net:51233';
+          case 'mainnet': networkUrl = 'https://s1.ripple.com:51234'; break;
+          case 'devnet': networkUrl = 'https://s.devnet.rippletest.net:51234'; break;
+          default: networkUrl = 'https://s.altnet.rippletest.net:51234';
         }
-        // @ts-ignore
-        const api = new xrpl.Client(networkUrl);
-        await api.connect();
 
-        // search xrp ledger for amount;
-        const response = await api.request({
-          command: 'tx',
-          transaction: txid,
-        });
-        console.log('xrp txid', response);
-
-        const amount = response.result.Amount;
-        const sender = response.result.Account;
-        const timestamp = new Date().getTime();
-
-        const query = { owner, repo, prid, txid, amount, sender, timestamp };
-        const record = await axios.post('/api/transaction', { target, network, ...query });
+        const query = { owner, repo, prid, txid, target, network, networkUrl };
+        const record = await axios.post('/api/transaction', { ...query });
         console.log('save', record);
         // @ts-ignore
-        setList(oldList => [...oldList, query]);
+        setList(oldList => [...oldList, record.data.insertData]);
 
         handleClose();
       }
     }
-  }, [xummPayment])
+  }, [xummPayment]);
 
   useEffect(() => {
-    async function getTransactions() {
-      const records = await axios.get('/api/transaction', {
-        params: { owner, repo, prid },
-      });
-      setList(records.data);
-    }
-
-    getTransactions();
-  }, [])
+    setList(records);
+  }, []);
 
   return (
     <div>
@@ -205,34 +185,49 @@ const XRPHome: NextPage = ({ pullRequest, xummPayment }: any) => {
 export async function getServerSideProps(context: any) {
   const { owner = '', repo = '', prid = '', address = '' } = context.query;
 
-  const [pullRequest, xummPayment]: Array<any> = await Promise.all([
+  const [pullRequest, xummPayment, records]: Array<any> = await Promise.all([
     getPullRequestInfo(),
     getPaymentInfo(),
+    getRecords(),
   ]);
 
   return {
     props: {
       pullRequest,
       xummPayment,
+      records,
     },
   };
 
-  async function getPullRequestInfo() {
-    const GRAPHQL_URL = 'https://api.github.com/graphql';
-
-    const headers = {
-      'content-type': 'application/json',
-      'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-    };
-    const query = `query {
-    repository(name: "${repo}", owner: "${owner}") {
-      pullRequest(number: ${prid}) {
-        id title
+  async function getRecords() {
+    const { MONGODB_DB, MONGODB_COLLECTION } = process.env;
+    const filter = { owner, repo, prid };
+    const unquoted_Filter = unquotedStringify(filter);
+    const query = `query MyMongo {
+      mongo(
+        collection: "${MONGODB_COLLECTION}"
+        database: "${MONGODB_DB}"
+        dataSource: "Cluster0"
+        sort: {timestamp: -1}
+        filter: ${unquoted_Filter}
+      ) {
+        _id network owner repo prid txid amount sender timestamp
       }
-    }
-  }`;
-    const res = await axios.post(GRAPHQL_URL, { query }, { headers });
-    return res.data.data.repository.pullRequest;
+    }`;
+    const data = await stepzenRequest(query);
+    return data.mongo;
+  }
+
+  async function getPullRequestInfo() {
+    const query = `query {
+      repository(name: "${repo}", owner: "${owner}") {
+        pullRequest(number: ${prid}) {
+          id title
+        }
+      }
+    }`;
+    const data = await stepzenRequest(query);
+    return data.repository.pullRequest;
   }
 
   async function getPaymentInfo() {

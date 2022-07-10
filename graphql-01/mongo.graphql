@@ -5,6 +5,7 @@ scalar Long
 
 type Document {
   _id: String
+  network: String
   amount: String
   owner: String
   prid: String
@@ -15,6 +16,7 @@ type Document {
 }
 
 input DocumentInput {
+  network: String
   amount: String
   owner: String
   prid: String

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import axios from 'axios'
-import connection from '../../helpers/mongo';
+import stepzenRequest, { unquotedStringify } from '../../helpers/stepzen';
+
+const { MONGODB_DB, MONGODB_COLLECTION } = process.env;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const method = req.method?.toUpperCase();
@@ -24,65 +25,84 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 }
 
 async function insertTransaction(body: any): Promise<any> {
-  const client = await connection;
-  const db = client.db(process.env.MONGODB_DB);
-  const result = await db.collection(process.env.MONGODB_COLLECTION)
-    .insertOne(body);
+  const { repo, owner, prid, txid, target, network, networkUrl } = body;
 
-  // insert github comment to the PR so that it trigger the label again
-  const { repo, owner, prid, txid, amount, target, network } = body;
-  console.log('transaction param', JSON.stringify(body, null, 2));
-  const GRAPHQL_URL = 'https://api.github.com/graphql';
-  const headers = {
-    'content-type': 'application/json',
-    'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-  };
-
-  let query: string = '', res;
-  query = `query {
+  const query = `query {
     repository(name: "${repo}", owner: "${owner}") {
       pullRequest(number: ${prid}) {
         id
       }
     }
+    mongo(
+      collection: "${MONGODB_COLLECTION}"
+      database: "${MONGODB_DB}"
+      dataSource: "Cluster0"
+      sort: {timestamp: -1}
+      filter: ${unquotedStringify({ repo, owner, prid })}
+    ) {
+      _id network owner repo prid txid amount
+    }
+    xrp: ripple_tx(
+      server: "${networkUrl}"
+      txid: "${txid}"
+    ) {
+      Account Amount
+    }
   }`;
-  res = await axios.post(GRAPHQL_URL, { query }, { headers });
-  const id = res.data.data.repository.pullRequest.id;
+  const res = await stepzenRequest(query);
 
-  const list = await getTransaction({ prid, owner, repo });
-  const total = list.reduce((sum: number, e: any) => sum + parseInt(e.amount), 0);
+  const sender = res.xrp.Account;
+  const amount = res.xrp.Amount;
+  const pullRequestId = res.repository.pullRequest.id;
+  const timestamp = new Date().getTime();
+
+  const total = res.mongo.reduce((sum: number, e: any) => sum + parseInt(e.amount), 0);
   const isTargetAchieved = total >= (parseFloat(target) * 1000000);
-
   console.log('isTargetAchieved:', isTargetAchieved, total, amount, target);
 
-  const commentBody = `<strong>XRPDonation:${isTargetAchieved ? 'Achieved' : 'Funded'}</strong> Received ${amount/1000000} XRP.
-  Click <a href=\\"https://${network}.xrpl.org/transactions/${txid}\\">here</a> for more details.`;
+  const insertData = { repo, owner, prid, sender, txid, amount, network, timestamp };
+  const unquotedInsert = unquotedStringify(insertData);
+  const commentBody = `<strong>XRPDonation:${isTargetAchieved ? 'Achieved' : 'Funded'}</strong> Received ${amount/1000000} XRP.\\nClick <a href=\\"https://${network}.xrpl.org/transactions/${txid}\\">here</a> for more details.`;
 
-  query = `mutation {
-    addComment(input: {subjectId: "${id}", body: "${commentBody}"}) {
+  const mutation = `mutation {
+    insertMongo: mongoInsertOne(
+      collection: "${MONGODB_COLLECTION}"
+      database: "${MONGODB_DB}"
+      dataSource: "Cluster0"
+      document: ${unquotedInsert}
+    )
+
+    addComment(input: {subjectId: "${pullRequestId}", body: "${commentBody}"}) {
       subject { id }
     }
-  }`
-  res = await axios.post(GRAPHQL_URL, { query }, { headers });
-
-  return result;
+  }`;
+  const insertRes = await stepzenRequest(mutation);
+  
+  return {...res, ...insertRes, insertData};
 }
 
-async function getTransaction(query: any): Promise<any> {
-  const client = await connection;
-  const db = client.db(process.env.MONGODB_DB);
-
+async function getTransaction(filter: any): Promise<any> {
   let limit = 50;
-  if (query.limit != null) {
-    limit = parseInt(query.limit);
-    delete query.limit;
+  if (filter.limit != null) {
+    limit = parseInt(filter.limit);
+    delete filter.limit;
   }
 
-  const results = await db.collection(process.env.MONGODB_COLLECTION)
-    .find(query)
-    .sort({ timestamp: -1 })
-    .limit(limit)
-    .toArray();
-
-  return results;
+  const unquoted_Filter = unquotedStringify(filter);
+  
+  const query = `query MyMongo {
+    mongo(
+      collection: "${MONGODB_COLLECTION}"
+      database: "${MONGODB_DB}"
+      dataSource: "Cluster0"
+      limit: ${limit}
+      sort: {timestamp: -1}
+      filter: ${unquoted_Filter}
+    ) {
+      _id target network owner repo prid txid amount sender timestamp
+    }
+  }`;
+ 
+  const data = await stepzenRequest(query);
+  return data.mongo;
 }

@@ -7,6 +7,20 @@ Refer to [XRP-Donation-Action](https://github.com/blueorbitz/xrp-donation-action
 The Github action will route using `XRP_DONATION_URL` environment variable with the following structure for the endpoint.
 `{XRP_DONATION_URL}/{Github Owner}/{Github Repo}/{Pull Request#}?address={xrp wallet}&network={xrp network}&target={target-goal}`.
 
+## Stepzen configuration
+Install Stepzen: `npm install -g stepzen`
+
+Rename `config.yaml.sample` to `config.yaml`.
+- Replace the `<Details>` with the respective information.
+- Github access token
+- Mongo Data API. Remember to turn on "Read & write" permissions.
+
+Deploy changes: `stepzen start`
+
+## Next JS configuration
+Rename `.env.local.sample` to `.env.local`
+- Xumm APIKey and APISecret.
+
 ## Getting Started
 
 First, run the development server:

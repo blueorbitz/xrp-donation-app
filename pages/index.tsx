@@ -28,7 +28,6 @@ const Home: NextPage = () => {
         params: { network, limit: 3 },
       });
       setTransactions(records.data);
-      console.log(records.data);
     }
 
     getTransactions();
