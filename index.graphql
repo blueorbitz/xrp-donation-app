@@ -1,0 +1,3 @@
+schema @sdl(files: ["graphql-01/github.graphql", "graphql-01/mongo.graphql", "graphql-01/ripple.graphql"]) {
+  query: Query
+}

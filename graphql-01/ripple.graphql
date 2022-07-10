@@ -1,0 +1,58 @@
+type Memo1 {
+  MemoData: String
+}
+
+type Memo {
+  Memo: Memo1
+}
+
+type Result {
+  Account: String
+  Amount: String
+  Destination: String
+  Fee: String
+  LastLedgerSequence: Int
+  Memos: [Memo]
+  Sequence: Int
+  SigningPubKey: String
+  TransactionType: String
+  TxnSignature: String
+  date: Int
+  hash: String
+  inLedger: Int
+  ledger_index: Int
+  status: String
+  validated: Boolean
+}
+
+type RippleTx {
+  result: Result
+}
+
+type RippleData {
+  ripple_tx: RippleTx
+}
+
+type Query {
+  ripple_tx(
+    server: String!
+    txid: String!
+  ): Result
+    @rest(
+      endpoint: "$server"
+      headers: [{ name: "Content-Type", value: "application/json" }]
+      postbody: """
+      {
+        "method": "tx",
+        "params": [
+          {
+            "transaction": "{{ .Get "txid" }}",
+            "binary": false
+          }
+        ]
+      }
+      """
+      configuration: "api_ripple_config"
+      resultroot: "result"
+    )
+}

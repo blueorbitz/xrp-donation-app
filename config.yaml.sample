@@ -1,0 +1,15 @@
+configurationset:
+  - configuration:
+      name: api_github_com_graphql_config
+      authorization_2b093ca92e: Bearer <GITHUB Token>
+  - configuration:
+      name: api_mongo_com_graphql_config
+      appId: <MongoDB Data API App ID>
+      dataApikey: <MongoDB Data API Key>
+      database: <MongoDB Database>
+      datasource: Cluster0
+      collection: <MongoDB Collection
+  - configuration:
+      name: "api_ripple_config"
+      stepzen.queryextensionguard: true
+    

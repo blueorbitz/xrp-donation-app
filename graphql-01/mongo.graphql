@@ -1,0 +1,71 @@
+scalar MongoFilter
+scalar MongoProjection
+scalar MongoSort
+scalar Long
+
+type Document {
+  _id: String
+  amount: String
+  owner: String
+  prid: String
+  repo: String
+  sender: String
+  timestamp: Long
+  txid: String
+}
+
+input DocumentInput {
+  amount: String
+  owner: String
+  prid: String
+  repo: String
+  sender: String
+  timestamp: Long
+  txid: String
+}
+
+type OneMongo {
+  documents: [Document]
+}
+
+type Data {
+  mongo: [OneMongo]
+}
+
+type Query {
+  mongo(
+    dataSource: String!
+    collection: String!
+    database: String!
+    filter: MongoFilter
+    projection: MongoProjection
+    sort: MongoSort
+    limit: Int
+    skip: Int
+  ): [Document]
+    @rest(
+      endpoint: "https://data.mongodb-api.com/app/$appId/endpoint/data/v1/action/find"
+      method: POST
+      headers: [{ name: "api-key", value: "$dataApikey" }]
+      configuration: "api_mongo_com_graphql_config"
+      resultroot: "documents[]"
+    )
+}
+
+type Mutation {
+  mongoInsertOne(
+    dataSource: String!
+    collection: String!
+    database: String!
+    document: DocumentInput
+  ): JSON
+    @rest(
+      endpoint: "https://data.mongodb-api.com/app/$appId/endpoint/data/v1/action/insertOne"
+      method: POST
+      headers: [
+        { name: "Content-Type", value: "application/json" }
+        { name: "api-key", value: "$dataApikey" }
+      ]
+      configuration: "api_mongo_com_graphql_config"
+    )
+}
