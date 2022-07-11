@@ -9,7 +9,7 @@ The Github action will route using `XRP_DONATION_URL` environment variable with 
 
 ## Video and Demo
 
-https://youtu.be/ULanS935bKY
+[Youtube demo](https://youtu.be/C4AWsdibkIk)
 
 ## Getting Started
 
