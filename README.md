@@ -20,6 +20,7 @@ Deploy changes: `stepzen start`
 ## Next JS configuration
 Rename `.env.local.sample` to `.env.local`
 - Xumm APIKey and APISecret.
+- Stepzen Admin Key and Url
 
 ## Getting Started
 
